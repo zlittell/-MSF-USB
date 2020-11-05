@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "documentationRules": {
+        "companyName": "Mechanical Squid Factory",
+        "copyrightText": 
+           "Copyright © {companyName} All rights reserved."
+    }
+  }
+}

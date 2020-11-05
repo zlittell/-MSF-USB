@@ -1,0 +1,262 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MSF.USBConnector</name>
+    </assembly>
+    <members>
+        <member name="T:MSF.USBConnector.Events.DeviceConnectedEvent">
+            <summary>Message For Device Connecting.</summary>
+        </member>
+        <member name="M:MSF.USBConnector.Events.DeviceConnectedEvent.#ctor(System.Object,Device.Net.DeviceEventArgs)">
+            <summary>
+            Initializes a new instance of the <see cref="T:MSF.USBConnector.Events.DeviceConnectedEvent"/> class.
+            </summary>
+            <param name="s">Sender Object.</param>
+            <param name="e">DeviceEventArgs.</param>
+        </member>
+        <member name="P:MSF.USBConnector.Events.DeviceConnectedEvent.Sender">
+            <inheritdoc/>
+        </member>
+        <member name="P:MSF.USBConnector.Events.DeviceConnectedEvent.EventArgs">
+            <inheritdoc/>
+        </member>
+        <member name="T:MSF.USBConnector.Events.DeviceDisconnectedEvent">
+            <summary>Message For Device Disconnecting.</summary>
+        </member>
+        <member name="M:MSF.USBConnector.Events.DeviceDisconnectedEvent.#ctor(System.Object,Device.Net.DeviceEventArgs)">
+            <summary>
+            Initializes a new instance of the <see cref="T:MSF.USBConnector.Events.DeviceDisconnectedEvent"/> class.
+            </summary>
+            <param name="s">Sender Object.</param>
+            <param name="e">DeviceEventArgs.</param>
+        </member>
+        <member name="P:MSF.USBConnector.Events.DeviceDisconnectedEvent.Sender">
+            <inheritdoc/>
+        </member>
+        <member name="P:MSF.USBConnector.Events.DeviceDisconnectedEvent.EventArgs">
+            <inheritdoc/>
+        </member>
+        <member name="T:MSF.USBConnector.Events.IDeviceListenerEvent">
+            <summary>Describes an event from the Device Listener.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.Events.IDeviceListenerEvent.EventArgs">
+            <summary>Gets the device event arguments.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.Events.IDeviceListenerEvent.Sender">
+            <summary>Gets the sender of the event.</summary>
+        </member>
+        <member name="T:MSF.USBConnector.IUSBDeviceConnector">
+            <summary>
+            Interface for a USB Device Connector.
+            </summary>
+        </member>
+        <member name="P:MSF.USBConnector.IUSBDeviceConnector.DeviceFilters">
+            <summary>Gets list of device filters.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.IUSBDeviceConnector.DeviceListener">
+            <summary>Gets the system listener for device connects/disconnects.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.IUSBDeviceConnector.DeviceLogger">
+            <summary>Gets the ILogger registered to the USB functionality.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.IUSBDeviceConnector.DeviceTracer">
+            <summary>Gets the ITracer registered to the USB functionality.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.IUSBDeviceConnector.SelectedUSBDevice">
+            <summary>Gets or sets the USB Device that has been selected for use in functions.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.IUSBDeviceConnector.USBDeviceList">
+            <summary>Gets list of connected USB Devices.</summary>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.AddHidDeviceToFilterList(System.UInt32,System.Nullable{System.UInt32})">
+            <summary>
+            Function to add a VID and PID combo to the HID Device Filter List.
+            </summary>
+            <param name="queryVendorID">USB VID to add.</param>
+            <param name="queryProductID">USB PID to add.</param>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.CloseUSBDevice">
+            <summary>Closes the open selected USB Device.</summary>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.FindFirstMatchingUSBHIDDevice">
+            <summary>Sets the first USB HID devices that matches the filter list as the selected USB Device.</summary>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.OpenUSBDevice">
+            <summary>
+            Opens the selected USB Device.
+            </summary>
+            <returns>Awaitable task for this operation.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.ParsePayload(Device.Net.ReadResult)">
+            <summary>
+            Function to generically parse a payload.
+            </summary>
+            <param name="receivedData">ReadResult data received from USB device.</param>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.UpdateUSBHIDDeviceList">
+            <summary>
+            Updates and refreshes the USB HID Device list based on filter list.
+            </summary>
+            <returns>Awaitable task for this operation.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.ReadUSBDevice">
+            <summary>
+            Async function for reading data from a USB device.
+            </summary>
+            <returns>Awaitable task for this operation.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.WriteUSBDevice(System.Byte[])">
+            <summary>
+            Writes data to the open usb device.
+            </summary>
+            <param name="sendData">Byte array to send to device.</param>
+            <returns>Awaitable task for this operation.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.WriteAndReadUSBDevice(System.Byte[])">
+            <summary>
+            Writes to the usb devices and then waits for it to return data.
+            </summary>
+            <param name="writeData">Byte array of data to write.</param>
+            <returns>Awaitable task for this operation.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.SelectDevice(Device.Net.IDevice)">
+            <summary>
+            Select a device from the IDevice list to use for connections.
+            </summary>
+            <param name="selectDevice">Device to select.</param>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.ContinousRead">
+            <summary>
+            Continously reads from device when detected and selected.
+            </summary>
+            <returns>Task for the continous reading.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.SendUSBMessage(MSF.USBMessages.ISendableUSBMessage)">
+            <summary>
+            Send a USB Message to connected device.
+            </summary>
+            <param name="messageToSend">ISendableUSBMessage to send to device.</param>
+            <returns>Task for write operation.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.IUSBDeviceConnector.ReceivedUSBMessageHandler(MSF.USBMessages.IReceivableUSBMessage)">
+            <summary>
+            Handles received messages from USB Devices.
+            </summary>
+            <param name="message">Message to handle.</param>
+        </member>
+        <member name="T:MSF.USBConnector.USBDeviceConnector">
+            <summary>Class for usb device connection.</summary>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.#ctor(Caliburn.Micro.IEventAggregator)">
+            <summary>
+            Initializes a new instance of the <see cref="T:MSF.USBConnector.USBDeviceConnector"/> class.
+            </summary>
+            <param name="aggregator">Event Aggregator wired in from caliburn micro.</param>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceListener">
+            <inheritdoc/>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceLogger">
+            <inheritdoc/>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceTracer">
+            <inheritdoc/>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.SelectedUSBDevice">
+            <inheritdoc/>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.USBDeviceList">
+            <inheritdoc/>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceFilters">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.SetupDeviceListener">
+            <summary>Sets up Device Listener.</summary>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.AddHidDeviceToFilterList(System.UInt32,System.Nullable{System.UInt32})">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.UpdateUSBHIDDeviceList">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.FindFirstMatchingUSBHIDDevice">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.OpenUSBDevice">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.CloseUSBDevice">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.ParsePayload(Device.Net.ReadResult)">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.ReceivedUSBMessageHandler(MSF.USBMessages.IReceivableUSBMessage)">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.WriteAndReadUSBDevice(System.Byte[])">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.ReadUSBDevice">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.WriteUSBDevice(System.Byte[])">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.ContinousRead">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.SendUSBMessage(MSF.USBMessages.ISendableUSBMessage)">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.SelectDevice(Device.Net.IDevice)">
+            <inheritdoc/>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.DeviceConnectedEvent(System.Object,Device.Net.DeviceEventArgs)">
+            <summary>
+            Event Called when filtered device connects.
+            </summary>
+            <param name="sender">Event Sender.</param>
+            <param name="e">Event Arguments.</param>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.DeviceDisconnectEvent(System.Object,Device.Net.DeviceEventArgs)">
+            <summary>
+            Event Called when filtered device connects.
+            </summary>
+            <param name="sender">Event Sender.</param>
+            <param name="e">Event Arguments.</param>
+        </member>
+        <member name="T:MSF.USBConnector.Utility.ByteHelper">
+            <summary>Helper class related to bytes from microcontrollers.</summary>
+        </member>
+        <member name="M:MSF.USBConnector.Utility.ByteHelper.IntToBigEndian(System.Int32)">
+            <summary>
+            Converts an integer to a byte array with the MSB first.
+            </summary>
+            <param name="toConvert">Integer to convert to bytes.</param>
+            <returns>Big Endian Byte Array.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.Utility.ByteHelper.IntToLittleEndian(System.Int32)">
+            <summary>
+            Converts an integer to a byte array with the LSB first.
+            </summary>
+            <param name="toConvert">Integer to convert to bytes.</param>
+            <returns>Little Endian Byte Array.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.Utility.ByteHelper.ByteArrayToIntBigEndian(System.Byte[])">
+            <summary>
+            Converts a byte array to an integer with the MSB first.
+            </summary>
+            <param name="toConvert">Array of 4 bytes to make int.</param>
+            <returns>Integer converted value.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.Utility.ByteHelper.ByteArrayToIntLittleEndian(System.Byte[])">
+            <summary>
+            Converts a byte array to an integer with the LSB first.
+            </summary>
+            <param name="toConvert">Array of 4 bytes to make int.</param>
+            <returns>Integer converted value.</returns>
+        </member>
+    </members>
+</doc>

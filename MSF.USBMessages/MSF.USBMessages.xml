@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MSF.USBMessages</name>
+    </assembly>
+    <members>
+        <member name="T:MSF.USBMessages.IReceivableUSBMessage">
+            <summary>Receivable USB datagram interface.</summary>
+        </member>
+        <member name="M:MSF.USBMessages.IReceivableUSBMessage.ParsePayload(System.Collections.Immutable.ImmutableArray{System.Byte})">
+            <summary>
+            Parse payload.
+            </summary>
+            <param name="payload">Payload to parse.</param>
+        </member>
+        <member name="T:MSF.USBMessages.ISendableUSBMessage">
+            <summary>Sendable USB datagram interface.</summary>
+        </member>
+        <member name="M:MSF.USBMessages.ISendableUSBMessage.ToBytes">
+            <summary>
+            To bytes.
+            </summary>
+            <returns>Sendable USB datagram as bytes.</returns>
+        </member>
+        <member name="T:MSF.USBMessages.ISimpleUSBMessage">
+            <summary>Simple USB Datagram interface.</summary>
+        </member>
+        <member name="P:MSF.USBMessages.ISimpleUSBMessage.Payload">
+            <summary>Gets payload.</summary>
+        </member>
+        <member name="T:MSF.USBMessages.ReceivableSimpleUSBMessage">
+            <summary>Receivable simple USB datagram.</summary>
+        </member>
+        <member name="M:MSF.USBMessages.ReceivableSimpleUSBMessage.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:MSF.USBMessages.ReceivableSimpleUSBMessage"/> class.
+            </summary>
+        </member>
+        <member name="M:MSF.USBMessages.ReceivableSimpleUSBMessage.FromBytes``1(System.Byte[])">
+            <summary>
+            From bytes.
+            </summary>
+            <typeparam name="T">Type of receivable USB datagram.</typeparam>
+            <param name="data">Data used to create the receivable USB datagram of type T.</param>
+            <returns>Instance of receivable simple USB message of type T.</returns>
+            <exception cref="T:System.ArgumentNullException">Data is null.</exception>
+        </member>
+        <member name="M:MSF.USBMessages.ReceivableSimpleUSBMessage.ParsePayload(System.Collections.Immutable.ImmutableArray{System.Byte})">
+            <inheritdoc/>
+        </member>
+        <member name="T:MSF.USBMessages.SendableSimpleUSBMessage">
+            <summary>Sendable simple USB datagram.</summary>
+        </member>
+        <member name="M:MSF.USBMessages.SendableSimpleUSBMessage.#ctor(System.Byte[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:MSF.USBMessages.SendableSimpleUSBMessage"/> class.
+            </summary>
+            <param name="payload">Payload used to create the sendable USB datagram.</param>
+            <exception cref="T:System.ArgumentNullException">Payload is null.</exception>
+        </member>
+        <member name="M:MSF.USBMessages.SendableSimpleUSBMessage.ToBytes">
+            <inheritdoc/>
+        </member>
+        <member name="T:MSF.USBMessages.SimpleUSBMessage">
+            <summary>
+            Describes the generic simple USB datagram used for MSF devices.
+            </summary>
+        </member>
+        <member name="P:MSF.USBMessages.SimpleUSBMessage.Payload">
+            <summary>Gets or sets payload array. </summary>
+        </member>
+    </members>
+</doc>

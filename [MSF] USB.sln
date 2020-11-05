@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29911.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSF.USBConnector", "MSF.USBConnector\MSF.USBConnector.csproj", "{A3512E42-E689-4986-B49B-6120C563062F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSF.USBConnector.Tests", "MSF.USBConnector.Tests\MSF.USBConnector.Tests.csproj", "{21BE8FF2-9313-4F48-812C-F5B41FD5BB76}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSF.USBMessages", "MSF.USBMessages\MSF.USBMessages.csproj", "{B120E4C7-FB85-4B0C-846D-FC7AF0356373}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSF.USBMessages.Tests", "MSF.USBMessages.Tests\MSF.USBMessages.Tests.csproj", "{DD207C2A-01FD-4B3E-995B-F45AD7BCD3BF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2EB4A5CF-FD22-47DA-8FA2-1EDF371CD9D1}"
+	ProjectSection(SolutionItems) = preProject
+		tools\code.ruleset = tools\code.ruleset
+		tools\stylecop.json = tools\stylecop.json
+		tools\test.ruleset = tools\test.ruleset
+		tools\TestCoverage.bat = tools\TestCoverage.bat
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A3512E42-E689-4986-B49B-6120C563062F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3512E42-E689-4986-B49B-6120C563062F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3512E42-E689-4986-B49B-6120C563062F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3512E42-E689-4986-B49B-6120C563062F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21BE8FF2-9313-4F48-812C-F5B41FD5BB76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21BE8FF2-9313-4F48-812C-F5B41FD5BB76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21BE8FF2-9313-4F48-812C-F5B41FD5BB76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21BE8FF2-9313-4F48-812C-F5B41FD5BB76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B120E4C7-FB85-4B0C-846D-FC7AF0356373}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B120E4C7-FB85-4B0C-846D-FC7AF0356373}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B120E4C7-FB85-4B0C-846D-FC7AF0356373}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B120E4C7-FB85-4B0C-846D-FC7AF0356373}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD207C2A-01FD-4B3E-995B-F45AD7BCD3BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD207C2A-01FD-4B3E-995B-F45AD7BCD3BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD207C2A-01FD-4B3E-995B-F45AD7BCD3BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD207C2A-01FD-4B3E-995B-F45AD7BCD3BF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9C10839C-A3EA-496F-86D0-FD629008379B}
+	EndGlobalSection
+EndGlobal
