@@ -129,7 +129,7 @@ namespace MSF.USBConnector
     /// <inheritdoc/>
     public virtual void ReceivedUSBMessageHandler(IReceivableUSBMessage message)
     {
-      this.eventAggregator.PublishOnUIThreadAsync(message);
+      this.eventAggregator.PublishOnBackgroundThreadAsync(message);
     }
 
     /// <inheritdoc/>
