@@ -12,7 +12,6 @@ using Device.Net;
 using Hid.Net.Windows;
 using MSF.USBConnector.Events;
 using MSF.USBMessages;
-using Usb.Net.Windows;
 
 namespace MSF.USBConnector
 {
@@ -30,7 +29,7 @@ namespace MSF.USBConnector
     public USBDeviceConnector(IEventAggregator aggregator)
     {
       this.eventAggregator = aggregator;
-      WindowsUsbDeviceFactory.Register(this.DeviceLogger, this.DeviceTracer);
+      // WindowsUsbDeviceFactory.Register(this.DeviceLogger, this.DeviceTracer);
       WindowsHidDeviceFactory.Register(this.DeviceLogger, this.DeviceTracer);
     }
 
@@ -156,20 +155,38 @@ namespace MSF.USBConnector
     /// <inheritdoc/>
     public async Task WriteUSBDevice(byte[] sendData)
     {
-      if (this.SelectedUSBDevice != null)
+      if (sendData != null)
       {
-        try
+        if (this.SelectedUSBDevice != null)
         {
-          await this.SelectedUSBDevice.WriteAsync(sendData).ConfigureAwait(true);
+          if (sendData.Length <= this.SelectedUSBDevice.ConnectedDeviceDefinition.WriteBufferSize)
+          {
+            byte[] data = new byte[(int)this.SelectedUSBDevice.ConnectedDeviceDefinition.WriteBufferSize];
+            Buffer.BlockCopy(sendData, 0, data, 0, sendData.Length);
+            try
+            {
+              await this.SelectedUSBDevice.WriteAsync(data).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+              throw new Exception("Error trying to write to device.", ex);
+            }
+          }
+          else
+          {
+            throw new ArgumentOutOfRangeException(nameof(sendData), "Cannot write data larger than buffer");
+          }
         }
-        catch (Exception ex)
+        else
         {
-          throw new Exception("Error trying to write to device.", ex);
+          throw new ArgumentNullException(nameof(this.SelectedUSBDevice), "Trying to write but a device is not selected.");
         }
       }
       else
       {
-        Debug.WriteLine("Trying to write but a device is not selected.");
+        {
+          throw new ArgumentNullException(nameof(sendData), "Data to write to device cannot be null");
+        }
       }
     }
 
@@ -208,6 +225,7 @@ namespace MSF.USBConnector
     {
       if (messageToSend != null)
       {
+        var bytes = messageToSend.ToBytes();
         await this.WriteUSBDevice(messageToSend.ToBytes()).ConfigureAwait(true);
       }
       else
