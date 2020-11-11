@@ -207,13 +207,13 @@ namespace MSF.USBConnector
             {
               this.SelectDevice(null);
             }
-            catch (System.Exception ex) when (ex.InnerException?.Message == "The device has not been initialized.")
+            catch (System.Exception ex) when (ex.Message == "The device has not been initialized.")
             {
               System.Diagnostics.Debug.WriteLine("Device isn't initialized for reading yet");
             }
             catch (Exception ex)
             {
-              throw new Exception(ex.Message);
+              throw new Exception("Exception occured when trying to continously read a usb device.", ex);
             }
           }
         }
