@@ -159,7 +159,7 @@ namespace MSF.USBConnector
       {
         if (this.SelectedUSBDevice != null)
         {
-          if (sendData.Length <= this.SelectedUSBDevice.ConnectedDeviceDefinition.WriteBufferSize)
+          if (sendData.Length <= this.SelectedUSBDevice.ConnectedDeviceDefinition?.WriteBufferSize)
           {
             byte[] data = new byte[(int)this.SelectedUSBDevice.ConnectedDeviceDefinition.WriteBufferSize];
             Buffer.BlockCopy(sendData, 0, data, 0, sendData.Length);
