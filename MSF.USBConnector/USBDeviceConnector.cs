@@ -29,7 +29,6 @@ namespace MSF.USBConnector
     public USBDeviceConnector(IEventAggregator aggregator)
     {
       this.eventAggregator = aggregator;
-      // WindowsUsbDeviceFactory.Register(this.DeviceLogger, this.DeviceTracer);
       WindowsHidDeviceFactory.Register(this.DeviceLogger, this.DeviceTracer);
     }
 
@@ -238,6 +237,24 @@ namespace MSF.USBConnector
     public void SelectDevice(IDevice selectDevice)
     {
       this.SelectedUSBDevice = selectDevice;
+    }
+
+    /// <summary>
+    /// Checks if the device list contains a device (Compares DeviceIDs).
+    /// </summary>
+    /// <param name="device">Device to check for.</param>
+    /// <returns>True if exists in list.</returns>
+    protected internal bool DoesDeviceListContainDevice(IDevice device)
+    {
+      foreach (IDevice checkDevice in this.USBDeviceList)
+      {
+        if (checkDevice.DeviceId == device?.DeviceId)
+        {
+          return true;
+        }
+      }
+
+      return false;
     }
 
     /// <summary>
