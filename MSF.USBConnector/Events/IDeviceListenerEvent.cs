@@ -7,7 +7,7 @@ using Device.Net;
 namespace MSF.USBConnector.Events
 {
     /// <summary>Describes an event from the Device Listener.</summary>
-    internal interface IDeviceListenerEvent
+    public interface IDeviceListenerEvent
     {
         /// <summary>Gets the device event arguments.</summary>
         DeviceEventArgs EventArgs { get; }
