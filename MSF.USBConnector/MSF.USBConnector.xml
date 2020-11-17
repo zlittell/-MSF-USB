@@ -213,6 +213,13 @@
         <member name="M:MSF.USBConnector.USBDeviceConnector.SelectDevice(Device.Net.IDevice)">
             <inheritdoc/>
         </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.DoesDeviceListContainDevice(Device.Net.IDevice)">
+            <summary>
+            Checks if the device list contains a device (Compares DeviceIDs).
+            </summary>
+            <param name="device">Device to check for.</param>
+            <returns>True if exists in list.</returns>
+        </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.DeviceConnectedEvent(System.Object,Device.Net.DeviceEventArgs)">
             <summary>
             Event Called when filtered device connects.
