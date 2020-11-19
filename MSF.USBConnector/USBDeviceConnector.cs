@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,16 +19,7 @@ namespace MSF.USBConnector
   /// <summary>Class for usb device connection.</summary>
   public class USBDeviceConnector
   {
-    /// <summary>Gets or sets interface for filtering devicelist.</summary>
-    protected virtual string UsbInterface { get; set; } = string.Empty;
-
-    /// <summary>Gets or sets Device Definition for filtering devices.</summary>
-    protected virtual FilterDeviceDefinition DeviceDefinition { get; set; } = new FilterDeviceDefinition();
-
-    protected IEventAggregator EventAggregator { get; }
-
-    protected CancellationToken continousReadCancellationToken { get; set; }
-
+    /// <summary>Constant millisecond time for polling frequency of device arrival/removal.</summary>
     private const int PollMilliseconds = 3000;
 
     /// <summary>
@@ -39,224 +31,52 @@ namespace MSF.USBConnector
       this.EventAggregator = aggregator;
       this.EventAggregator.SubscribeOnBackgroundThread(this);
       WindowsHidDeviceFactory.Register(this.DeviceLogger, this.DeviceTracer);
-      this.AddHidDeviceToFilterList(this.DeviceDefinition);
       this.SetupDeviceListener();
     }
 
-    /// <summary>
-    /// This method should be ran after the derived class is initialized.
-    /// </summary>
-    protected void RunAfterInitialized()
-    {
-      Task.Run(() => this.ContinousRead(), this.continousReadCancellationToken);
-      this.RefreshFilteredDeviceList();
-    }
-
-    /// <inheritdoc/>
-    public DeviceListener DeviceListener { get; private set; }
-
-    /// <inheritdoc/>
-    public ILogger DeviceLogger { get; } = new DebugLogger();
-
-    /// <inheritdoc/>
-    public ITracer DeviceTracer { get; } = new DebugTracer();
-
-        /// <inheritdoc/>
+    /// <summary>Gets or sets the USB Device that has been selected for use in functions.</summary>
     public virtual IDevice SelectedUSBDevice { get; set; }
 
-    /// <inheritdoc/>
+    /// <summary>Gets list of connected USB Devices.</summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "Order, single elements, and removeall")]
     public List<IDevice> USBDeviceList { get; private set; } = new List<IDevice>();
 
-    /// <inheritdoc/>
-    public List<FilterDeviceDefinition> DeviceFilters { get; private set; } = new List<FilterDeviceDefinition>();
+    /// <summary>Gets or sets interface for filtering devicelist.</summary>
+    protected virtual string UsbInterface { get; set; } = string.Empty;
 
-    /// <summary>Sets up Device Listener.</summary>
-    public void SetupDeviceListener()
-    {
-      this.DeviceListener?.Dispose();
-      this.DeviceListener = new DeviceListener(this.DeviceFilters, PollMilliseconds) { Logger = this.DeviceLogger };
-      this.DeviceListener.DeviceDisconnected += this.DeviceDisconnectEvent;
-      this.DeviceListener.DeviceInitialized += this.DeviceConnectedEvent;
-      this.DeviceListener.Start();
-    }
+    /// <summary>Gets list of device filters.</summary>
+    protected virtual Collection<FilterDeviceDefinition> DeviceFilters { get; } = new Collection<FilterDeviceDefinition>();
 
-    /// <inheritdoc/>
-    public void AddHidDeviceToFilterList(FilterDeviceDefinition filterDevice)
-    {
-      this.DeviceFilters.Add(filterDevice);
-    }
+    /// <summary>Gets Caliburn Micro Event Aggregator.</summary>
+    protected IEventAggregator EventAggregator { get; }
 
-    /// <inheritdoc/>
-    public async Task UpdateUSBHIDDeviceList()
-    {
-      try
-      {
-        this.USBDeviceList = await DeviceManager.Current.GetDevicesAsync(this.DeviceFilters).ConfigureAwait(false);
-      }
-      catch (Exception)
-      {
-        throw new Exception($"Failed to retrieve filtered list of USB HID Devices that match the filtered list.");
-      }
-    }
+    /// <summary>Gets the cancellation token for USB continous read task.</summary>
+    protected CancellationToken ContinousReadCancellationToken { get; }
 
-    /// <inheritdoc/>
-    public void FindFirstMatchingUSBHIDDevice()
-    {
-      this.SelectedUSBDevice = this.USBDeviceList.FirstOrDefault();
-    }
+    /// <summary>Gets or sets the system listener for device connects/disconnects.</summary>
+    private DeviceListener DeviceListener { get; set; }
 
-    /// <inheritdoc/>
-    public async Task OpenUSBDevice()
-    {
-      try
-      {
-        if (this.SelectedUSBDevice != null)
-        {
-          await this.SelectedUSBDevice.InitializeAsync().ConfigureAwait(false);
-        }
-      }
-      catch (ArgumentNullException)
-      {
-        throw new Exception("USB Device to open was null. Select and assign a device to class.");
-      }
-    }
+    /// <summary>Gets the ILogger registered to the USB functionality.</summary>
+    private ILogger DeviceLogger { get; } = new DebugLogger();
 
-    /// <inheritdoc/>
-    public void CloseUSBDevice()
-    {
-      try
-      {
-        if (this.SelectedUSBDevice != null)
-        {
-          this.SelectedUSBDevice.Close();
-        }
-      }
-      catch (ArgumentNullException)
-      {
-        throw new Exception("Tried to close a USB Device Stream, but the stream was null. Can only close a stream that is opened.");
-      }
-    }
+    /// <summary>Gets the ITracer registered to the USB functionality.</summary>
+    private ITracer DeviceTracer { get; } = new DebugTracer();
 
-    /// <inheritdoc/>
-    public virtual void ParsePayload(ReadResult receivedData)
-    {
-      ReceivableSimpleUSBMessage message = ReceivableSimpleUSBMessage.FromBytes<ReceivableSimpleUSBMessage>(receivedData);
-      this.ReceivedUSBMessageHandler(message);
-    }
-
-    /// <inheritdoc/>
-    public virtual void ReceivedUSBMessageHandler(IReceivableUSBMessage message)
-    {
-      this.EventAggregator.PublishOnBackgroundThreadAsync(message);
-    }
-
-    /// <inheritdoc/>
-    public async Task WriteAndReadUSBDevice(byte[] writeData)
-    {
-      ReadResult readBytes = await this.SelectedUSBDevice.WriteAndReadAsync(writeData).ConfigureAwait(false);
-      this.ParsePayload(readBytes);
-    }
-
-    /// <inheritdoc/>
-    public async Task ReadUSBDevice()
-    {
-      if ((this.SelectedUSBDevice != null) && this.SelectedUSBDevice.IsInitialized)
-      {
-        ReadResult readBytes = await this.SelectedUSBDevice.ReadAsync().ConfigureAwait(false);
-        this.ParsePayload(readBytes);
-      }
-      else
-      {
-        throw new Exception("Selected device is null or not initialized.");
-      }
-    }
-
-    /// <inheritdoc/>
-    public async Task WriteUSBDevice(byte[] sendData)
-    {
-      if (sendData != null)
-      {
-        if (this.SelectedUSBDevice != null)
-        {
-          if (sendData.Length <= this.SelectedUSBDevice.ConnectedDeviceDefinition?.WriteBufferSize)
-          {
-            byte[] data = new byte[(int)this.SelectedUSBDevice.ConnectedDeviceDefinition.WriteBufferSize];
-            Buffer.BlockCopy(sendData, 0, data, 0, sendData.Length);
-            try
-            {
-              await this.SelectedUSBDevice.WriteAsync(data).ConfigureAwait(true);
-            }
-            catch (Exception ex)
-            {
-              throw new Exception("Error trying to write to device.", ex);
-            }
-          }
-          else
-          {
-            throw new ArgumentOutOfRangeException(nameof(sendData), "Cannot write data larger than buffer");
-          }
-        }
-        else
-        {
-          throw new ArgumentNullException(nameof(this.SelectedUSBDevice), "Trying to write but a device is not selected.");
-        }
-      }
-      else
-      {
-        {
-          throw new ArgumentNullException(nameof(sendData), "Data to write to device cannot be null");
-        }
-      }
-    }
-
-    /// <inheritdoc/>
-    public async Task ContinousRead()
-    {
-      while (true)
-      {
-        if (this.SelectedUSBDevice != null)
-        {
-          if (this.SelectedUSBDevice.IsInitialized)
-          {
-            try
-            {
-              await this.ReadUSBDevice().ConfigureAwait(false);
-            }
-            catch (System.IO.IOException ex) when (ex.InnerException?.Message == "The device is not connected.")
-            {
-              this.SelectDevice(null);
-            }
-            catch (System.Exception ex) when (ex.Message == "The device has not been initialized.")
-            {
-              System.Diagnostics.Debug.WriteLine("Device isn't initialized for reading yet");
-            }
-            catch (Exception ex)
-            {
-              throw new Exception("Exception occured when trying to continously read a usb device.", ex);
-            }
-          }
-        }
-      }
-    }
-
-    /// <inheritdoc/>
+    /// <summary>
+    /// Send a USB Message to connected device.
+    /// </summary>
+    /// <param name="messageToSend">ISendableUSBMessage to send to device.</param>
+    /// <returns>Task for write operation.</returns>
     public async Task SendUSBMessage(ISendableUSBMessage messageToSend)
     {
       if (messageToSend != null)
       {
-        var bytes = messageToSend.ToBytes();
         await this.WriteUSBDevice(messageToSend.ToBytes()).ConfigureAwait(true);
       }
       else
       {
         throw new ArgumentException("Message to send cannot be null.", nameof(messageToSend));
       }
-    }
-
-    /// <inheritdoc/>
-    public void SelectDevice(IDevice selectDevice)
-    {
-      this.SelectedUSBDevice = selectDevice;
     }
 
     /// <summary>Refresh device list and filter it for only this devices correct interface.</summary>
@@ -279,11 +99,181 @@ namespace MSF.USBConnector
     }
 
     /// <summary>
+    /// This method should be ran after the derived class is initialized.
+    /// </summary>
+    protected void RunAfterInitialized()
+    {
+      Task.Run(() => this.ContinousRead(), this.ContinousReadCancellationToken);
+      this.RefreshFilteredDeviceList();
+    }
+
+    /// <summary>Sets up Device Listener.</summary>
+    protected void SetupDeviceListener()
+    {
+      this.DeviceListener?.Dispose();
+      this.DeviceListener = new DeviceListener(this.DeviceFilters, PollMilliseconds) { Logger = this.DeviceLogger };
+      this.DeviceListener.DeviceDisconnected += this.DeviceDisconnectEvent;
+      this.DeviceListener.DeviceInitialized += this.DeviceConnectedEvent;
+      this.DeviceListener.Start();
+    }
+
+    /// <summary>
+    /// Function to add a VID and PID combo to the HID Device Filter List.
+    /// </summary>
+    /// <param name="filterDevice">Filter definiteion to add.</param>
+    protected void AddHidDeviceToFilterList(FilterDeviceDefinition filterDevice)
+    {
+      this.DeviceFilters.Add(filterDevice);
+    }
+
+    /// <summary>
+    /// Updates and refreshes the USB HID Device list based on filter list.
+    /// </summary>
+    /// <returns>Awaitable task for this operation.</returns>
+    protected async Task UpdateUSBHIDDeviceList()
+    {
+      this.USBDeviceList = await DeviceManager.Current.GetDevicesAsync(this.DeviceFilters.ToList<FilterDeviceDefinition>()).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Opens the selected USB Device.
+    /// </summary>
+    /// <returns>Awaitable task for this operation.</returns>
+    protected async Task OpenUSBDevice()
+    {
+      if (this.SelectedUSBDevice != null)
+      {
+        await this.SelectedUSBDevice.InitializeAsync().ConfigureAwait(false);
+      }
+    }
+
+    /// <summary>Closes the open selected USB Device.</summary>
+    protected void CloseUSBDevice()
+    {
+      if (this.SelectedUSBDevice != null)
+      {
+        this.SelectedUSBDevice.Close();
+      }
+    }
+
+    /// <summary>
+    /// Function to generically parse a payload.
+    /// </summary>
+    /// <param name="receivedData">ReadResult data received from USB device.</param>
+    protected virtual void ParsePayload(ReadResult receivedData)
+    {
+      ReceivableSimpleUSBMessage message = ReceivableSimpleUSBMessage.FromBytes<ReceivableSimpleUSBMessage>(receivedData);
+      this.ReceivedUSBMessageHandler(message);
+    }
+
+    /// <summary>
+    /// Handles received messages from USB Devices.
+    /// </summary>
+    /// <param name="message">Message to handle.</param>
+    protected virtual void ReceivedUSBMessageHandler(IReceivableUSBMessage message)
+    {
+      this.EventAggregator.PublishOnBackgroundThreadAsync(message);
+    }
+
+    /// <summary>
+    /// Writes to the usb devices and then waits for it to return data.
+    /// </summary>
+    /// <param name="writeData">Byte array of data to write.</param>
+    /// <returns>Awaitable task for this operation.</returns>
+    protected async Task WriteAndReadUSBDevice(byte[] writeData)
+    {
+      ReadResult readBytes = await this.SelectedUSBDevice.WriteAndReadAsync(writeData).ConfigureAwait(false);
+      this.ParsePayload(readBytes);
+    }
+
+    /// <summary>
+    /// Async function for reading data from a USB device.
+    /// </summary>
+    /// <returns>Awaitable task for this operation.</returns>
+    protected async Task ReadUSBDevice()
+    {
+      if ((this.SelectedUSBDevice != null) && this.SelectedUSBDevice.IsInitialized)
+      {
+        ReadResult readBytes = await this.SelectedUSBDevice.ReadAsync().ConfigureAwait(false);
+        this.ParsePayload(readBytes);
+      }
+    }
+
+    /// <summary>
+    /// Writes data to the open usb device.
+    /// </summary>
+    /// <param name="sendData">Byte array to send to device.</param>
+    /// <returns>Awaitable task for this operation.</returns>
+    protected async Task WriteUSBDevice(byte[] sendData)
+    {
+      if (sendData != null)
+      {
+        if (this.SelectedUSBDevice != null)
+        {
+          if (sendData.Length <= this.SelectedUSBDevice.ConnectedDeviceDefinition?.WriteBufferSize)
+          {
+            byte[] data = new byte[(int)this.SelectedUSBDevice.ConnectedDeviceDefinition.WriteBufferSize];
+            Buffer.BlockCopy(sendData, 0, data, 0, sendData.Length);
+            await this.SelectedUSBDevice.WriteAsync(data).ConfigureAwait(true);
+          }
+          else
+          {
+            throw new ArgumentOutOfRangeException(nameof(sendData), "Cannot write data larger than buffer");
+          }
+        }
+        else
+        {
+          throw new ArgumentNullException(nameof(this.SelectedUSBDevice), "Trying to write but a device is not selected.");
+        }
+      }
+      else
+      {
+        {
+          throw new ArgumentNullException(nameof(sendData), "Data to write to device cannot be null");
+        }
+      }
+    }
+
+    /// <summary>
+    /// Continously reads from device when detected and selected.
+    /// </summary>
+    /// <returns>Task for the continous reading.</returns>
+    protected async Task ContinousRead()
+    {
+      while (true)
+      {
+        if (this.SelectedUSBDevice != null)
+        {
+          if (this.SelectedUSBDevice.IsInitialized)
+          {
+            try
+            {
+              await this.ReadUSBDevice().ConfigureAwait(false);
+            }
+            catch (System.IO.IOException ex) when (ex.InnerException?.Message == "The device is not connected.")
+            {
+              this.SelectDevice(null);
+            }
+          }
+        }
+      }
+    }
+
+    /// <summary>
+    /// Select a device from the IDevice list to use for connections.
+    /// </summary>
+    /// <param name="selectDevice">Device to select.</param>
+    protected void SelectDevice(IDevice selectDevice)
+    {
+      this.SelectedUSBDevice = selectDevice;
+    }
+
+    /// <summary>
     /// Checks if the device list contains a device (Compares DeviceIDs).
     /// </summary>
     /// <param name="device">Device to check for.</param>
     /// <returns>True if exists in list.</returns>
-    protected internal bool DoesDeviceListContainDevice(IDevice device)
+    private bool DoesDeviceListContainDevice(IDevice device)
     {
       foreach (IDevice checkDevice in this.USBDeviceList)
       {

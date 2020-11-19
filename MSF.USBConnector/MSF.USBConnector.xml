@@ -48,11 +48,8 @@
         <member name="T:MSF.USBConnector.USBDeviceConnector">
             <summary>Class for usb device connection.</summary>
         </member>
-        <member name="P:MSF.USBConnector.USBDeviceConnector.UsbInterface">
-            <summary>Gets or sets interface for filtering devicelist.</summary>
-        </member>
-        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceDefinition">
-            <summary>Gets or sets Device Definition for filtering devices.</summary>
+        <member name="F:MSF.USBConnector.USBDeviceConnector.PollMilliseconds">
+            <summary>Constant millisecond time for polling frequency of device arrival/removal.</summary>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.#ctor(Caliburn.Micro.IEventAggregator)">
             <summary>
@@ -60,73 +57,115 @@
             </summary>
             <param name="aggregator">Event Aggregator wired in from caliburn micro.</param>
         </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.SelectedUSBDevice">
+            <summary>Gets or sets the USB Device that has been selected for use in functions.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.USBDeviceList">
+            <summary>Gets list of connected USB Devices.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.UsbInterface">
+            <summary>Gets or sets interface for filtering devicelist.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceFilters">
+            <summary>Gets list of device filters.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.EventAggregator">
+            <summary>Gets Caliburn Micro Event Aggregator.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.ContinousReadCancellationToken">
+            <summary>Gets the cancellation token for USB continous read task.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceListener">
+            <summary>Gets or sets the system listener for device connects/disconnects.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceLogger">
+            <summary>Gets the ILogger registered to the USB functionality.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceTracer">
+            <summary>Gets the ITracer registered to the USB functionality.</summary>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.SendUSBMessage(MSF.USBMessages.ISendableUSBMessage)">
+            <summary>
+            Send a USB Message to connected device.
+            </summary>
+            <param name="messageToSend">ISendableUSBMessage to send to device.</param>
+            <returns>Task for write operation.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.RefreshFilteredDeviceList">
+            <summary>Refresh device list and filter it for only this devices correct interface.</summary>
+        </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.RunAfterInitialized">
             <summary>
             This method should be ran after the derived class is initialized.
             </summary>
         </member>
-        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceListener">
-            <inheritdoc/>
-        </member>
-        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceLogger">
-            <inheritdoc/>
-        </member>
-        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceTracer">
-            <inheritdoc/>
-        </member>
-        <member name="P:MSF.USBConnector.USBDeviceConnector.SelectedUSBDevice">
-            <inheritdoc/>
-        </member>
-        <member name="P:MSF.USBConnector.USBDeviceConnector.USBDeviceList">
-            <inheritdoc/>
-        </member>
-        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceFilters">
-            <inheritdoc/>
-        </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.SetupDeviceListener">
             <summary>Sets up Device Listener.</summary>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.AddHidDeviceToFilterList(Device.Net.FilterDeviceDefinition)">
-            <inheritdoc/>
+            <summary>
+            Function to add a VID and PID combo to the HID Device Filter List.
+            </summary>
+            <param name="filterDevice">Filter definiteion to add.</param>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.UpdateUSBHIDDeviceList">
-            <inheritdoc/>
-        </member>
-        <member name="M:MSF.USBConnector.USBDeviceConnector.FindFirstMatchingUSBHIDDevice">
-            <inheritdoc/>
+            <summary>
+            Updates and refreshes the USB HID Device list based on filter list.
+            </summary>
+            <returns>Awaitable task for this operation.</returns>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.OpenUSBDevice">
-            <inheritdoc/>
+            <summary>
+            Opens the selected USB Device.
+            </summary>
+            <returns>Awaitable task for this operation.</returns>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.CloseUSBDevice">
-            <inheritdoc/>
+            <summary>Closes the open selected USB Device.</summary>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.ParsePayload(Device.Net.ReadResult)">
-            <inheritdoc/>
+            <summary>
+            Function to generically parse a payload.
+            </summary>
+            <param name="receivedData">ReadResult data received from USB device.</param>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.ReceivedUSBMessageHandler(MSF.USBMessages.IReceivableUSBMessage)">
-            <inheritdoc/>
+            <summary>
+            Handles received messages from USB Devices.
+            </summary>
+            <param name="message">Message to handle.</param>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.WriteAndReadUSBDevice(System.Byte[])">
-            <inheritdoc/>
+            <summary>
+            Writes to the usb devices and then waits for it to return data.
+            </summary>
+            <param name="writeData">Byte array of data to write.</param>
+            <returns>Awaitable task for this operation.</returns>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.ReadUSBDevice">
-            <inheritdoc/>
+            <summary>
+            Async function for reading data from a USB device.
+            </summary>
+            <returns>Awaitable task for this operation.</returns>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.WriteUSBDevice(System.Byte[])">
-            <inheritdoc/>
+            <summary>
+            Writes data to the open usb device.
+            </summary>
+            <param name="sendData">Byte array to send to device.</param>
+            <returns>Awaitable task for this operation.</returns>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.ContinousRead">
-            <inheritdoc/>
-        </member>
-        <member name="M:MSF.USBConnector.USBDeviceConnector.SendUSBMessage(MSF.USBMessages.ISendableUSBMessage)">
-            <inheritdoc/>
+            <summary>
+            Continously reads from device when detected and selected.
+            </summary>
+            <returns>Task for the continous reading.</returns>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.SelectDevice(Device.Net.IDevice)">
-            <inheritdoc/>
-        </member>
-        <member name="M:MSF.USBConnector.USBDeviceConnector.RefreshFilteredDeviceList">
-            <summary>Refresh device list and filter it for only this devices correct interface.</summary>
+            <summary>
+            Select a device from the IDevice list to use for connections.
+            </summary>
+            <param name="selectDevice">Device to select.</param>
         </member>
         <member name="M:MSF.USBConnector.USBDeviceConnector.DoesDeviceListContainDevice(Device.Net.IDevice)">
             <summary>
