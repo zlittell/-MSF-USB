@@ -4,8 +4,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using Device.Net;
@@ -16,11 +16,19 @@ using MSF.USBMessages;
 namespace MSF.USBConnector
 {
   /// <summary>Class for usb device connection.</summary>
-  public class USBDeviceConnector : IUSBDeviceConnector
+  public class USBDeviceConnector
   {
-    private const int PollMilliseconds = 3000;
+    /// <summary>Gets or sets interface for filtering devicelist.</summary>
+    protected virtual string UsbInterface { get; set; } = string.Empty;
 
-    private readonly IEventAggregator eventAggregator;
+    /// <summary>Gets or sets Device Definition for filtering devices.</summary>
+    protected virtual FilterDeviceDefinition DeviceDefinition { get; set; } = new FilterDeviceDefinition();
+
+    protected IEventAggregator EventAggregator { get; }
+
+    protected CancellationToken continousReadCancellationToken { get; set; }
+
+    private const int PollMilliseconds = 3000;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="USBDeviceConnector"/> class.
@@ -28,8 +36,20 @@ namespace MSF.USBConnector
     /// <param name="aggregator">Event Aggregator wired in from caliburn micro.</param>
     public USBDeviceConnector(IEventAggregator aggregator)
     {
-      this.eventAggregator = aggregator;
+      this.EventAggregator = aggregator;
+      this.EventAggregator.SubscribeOnBackgroundThread(this);
       WindowsHidDeviceFactory.Register(this.DeviceLogger, this.DeviceTracer);
+      this.AddHidDeviceToFilterList(this.DeviceDefinition);
+      this.SetupDeviceListener();
+    }
+
+    /// <summary>
+    /// This method should be ran after the derived class is initialized.
+    /// </summary>
+    protected void RunAfterInitialized()
+    {
+      Task.Run(() => this.ContinousRead(), this.continousReadCancellationToken);
+      this.RefreshFilteredDeviceList();
     }
 
     /// <inheritdoc/>
@@ -61,9 +81,9 @@ namespace MSF.USBConnector
     }
 
     /// <inheritdoc/>
-    public void AddHidDeviceToFilterList(uint queryVendorID, uint? queryProductID)
+    public void AddHidDeviceToFilterList(FilterDeviceDefinition filterDevice)
     {
-      this.DeviceFilters.Add(new FilterDeviceDefinition { DeviceType = DeviceType.Hid, VendorId = queryVendorID, ProductId = queryProductID });
+      this.DeviceFilters.Add(filterDevice);
     }
 
     /// <inheritdoc/>
@@ -127,7 +147,7 @@ namespace MSF.USBConnector
     /// <inheritdoc/>
     public virtual void ReceivedUSBMessageHandler(IReceivableUSBMessage message)
     {
-      this.eventAggregator.PublishOnBackgroundThreadAsync(message);
+      this.EventAggregator.PublishOnBackgroundThreadAsync(message);
     }
 
     /// <inheritdoc/>
@@ -239,6 +259,25 @@ namespace MSF.USBConnector
       this.SelectedUSBDevice = selectDevice;
     }
 
+    /// <summary>Refresh device list and filter it for only this devices correct interface.</summary>
+    public virtual void RefreshFilteredDeviceList()
+    {
+      Task.Run(async () => { await this.UpdateUSBHIDDeviceList().ConfigureAwait(true); }).Wait();
+      this.USBDeviceList.RemoveAll(this.DoesNotContainCorrectInterface);
+
+      if (this.USBDeviceList.Count > 0)
+      {
+        if (this.SelectedUSBDevice == null | !this.DoesDeviceListContainDevice(this.SelectedUSBDevice))
+        {
+          this.SelectDevice(this.USBDeviceList.First());
+        }
+      }
+      else
+      {
+        this.SelectDevice(null);
+      }
+    }
+
     /// <summary>
     /// Checks if the device list contains a device (Compares DeviceIDs).
     /// </summary>
@@ -264,7 +303,7 @@ namespace MSF.USBConnector
     /// <param name="e">Event Arguments.</param>
     private void DeviceConnectedEvent(object sender, DeviceEventArgs e)
     {
-      this.eventAggregator.PublishOnUIThreadAsync(new DeviceConnectedEvent(sender, e));
+      this.EventAggregator.PublishOnUIThreadAsync(new DeviceConnectedEvent(sender, e));
     }
 
     /// <summary>
@@ -274,7 +313,17 @@ namespace MSF.USBConnector
     /// <param name="e">Event Arguments.</param>
     private void DeviceDisconnectEvent(object sender, DeviceEventArgs e)
     {
-      this.eventAggregator.PublishOnUIThreadAsync(new DeviceDisconnectedEvent(sender, e));
+      this.EventAggregator.PublishOnUIThreadAsync(new DeviceDisconnectedEvent(sender, e));
+    }
+
+    /// <summary>
+    /// Returns if a device is the wrong interface.
+    /// </summary>
+    /// <param name="obj">IDevice to check interface.</param>
+    /// <returns>True if does not contain correct interface.</returns>
+    private bool DoesNotContainCorrectInterface(IDevice obj)
+    {
+      return !obj.DeviceId.ContainsIgnoreCase(this.UsbInterface);
     }
   }
 }
