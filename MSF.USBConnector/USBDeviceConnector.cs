@@ -5,6 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -244,16 +246,22 @@ namespace MSF.USBConnector
       {
         if (this.SelectedUSBDevice != null)
         {
-          if (this.SelectedUSBDevice.IsInitialized)
+          try
           {
-            try
-            {
-              await this.ReadUSBDevice().ConfigureAwait(false);
-            }
-            catch (System.IO.IOException ex) when (ex.InnerException?.Message == "The device is not connected.")
-            {
-              this.SelectDevice(null);
-            }
+            await this.ReadUSBDevice().ConfigureAwait(false);
+          }
+          catch (IOException ex) when (ex.InnerException?.Message == "The device is not connected.")
+          {
+            this.SelectDevice(null);
+          }
+          catch (Exception ex) when (ex.Message == "The device has not been initialized.")
+          {
+            // debug write this? seems not useful
+          }
+          catch (Exception ex)
+          {
+            Debug.WriteLine(ex.Message.ToString());
+            throw new IOException("Problem in continous read thread.", ex);
           }
         }
       }
