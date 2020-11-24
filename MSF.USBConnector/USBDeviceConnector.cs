@@ -39,15 +39,17 @@ namespace MSF.USBConnector
     /// <summary>Gets or sets the USB Device that has been selected for use in functions.</summary>
     public virtual IDevice SelectedUSBDevice { get; set; }
 
-    /// <summary>Gets list of connected USB Devices.</summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "Order, single elements, and removeall")]
-    public List<IDevice> USBDeviceList { get; private set; } = new List<IDevice>();
+    /// <summary>Gets list of ConnectedDeviceDefinitions for USB devices.</summary>
+    public Collection<ConnectedDeviceDefinition> USBConnectedDeviceList { get; private set; }
 
     /// <summary>Gets or sets interface for filtering devicelist.</summary>
     protected virtual string UsbInterface { get; set; } = string.Empty;
 
     /// <summary>Gets list of device filters.</summary>
     protected virtual Collection<FilterDeviceDefinition> DeviceFilters { get; } = new Collection<FilterDeviceDefinition>();
+
+    /// <summary>Gets device filter.</summary>
+    protected virtual FilterDeviceDefinition DeviceFilter { get; }
 
     /// <summary>Gets Caliburn Micro Event Aggregator.</summary>
     protected IEventAggregator EventAggregator { get; }
@@ -85,13 +87,13 @@ namespace MSF.USBConnector
     public virtual void RefreshFilteredDeviceList()
     {
       Task.Run(async () => { await this.UpdateUSBHIDDeviceList().ConfigureAwait(true); }).Wait();
-      this.USBDeviceList.RemoveAll(this.DoesNotContainCorrectInterface);
+      this.RemoveIncorrectInterfaces();
 
-      if (this.USBDeviceList.Count > 0)
+      if (this.USBConnectedDeviceList.Count > 0)
       {
-        if (this.SelectedUSBDevice == null | !this.DoesDeviceListContainDevice(this.SelectedUSBDevice))
+        if (this.SelectedUSBDevice == null | !this.DoesConnectedDeviceListContainDevice(this.SelectedUSBDevice))
         {
-          this.SelectDevice(this.USBDeviceList.First());
+          this.SelectDevice(this.USBConnectedDeviceList.First());
         }
       }
       else
@@ -134,7 +136,8 @@ namespace MSF.USBConnector
     /// <returns>Awaitable task for this operation.</returns>
     protected async Task UpdateUSBHIDDeviceList()
     {
-      this.USBDeviceList = await DeviceManager.Current.GetDevicesAsync(this.DeviceFilters.ToList<FilterDeviceDefinition>()).ConfigureAwait(false);
+      var tempList = await DeviceManager.Current.GetConnectedDeviceDefinitionsAsync(this.DeviceFilter).ConfigureAwait(false);
+      this.USBConnectedDeviceList = new ObservableCollection<ConnectedDeviceDefinition>(tempList.ToList().Distinct());
     }
 
     /// <summary>
@@ -267,13 +270,21 @@ namespace MSF.USBConnector
       }
     }
 
+    /// <summary>Search Device Definition List for specific device.</summary>
+    /// <param name="deviceID">DeviceID to search for.</param>
+    /// <returns>DeviceDefinition with specific deviceID.</returns>
+    protected ConnectedDeviceDefinition GetDeviceDefinitionFromDeviceID(string deviceID)
+    {
+      return this.USBConnectedDeviceList.Where(i => i.DeviceId == deviceID).FirstOrDefault();
+    }
+
     /// <summary>
     /// Select a device from the IDevice list to use for connections.
     /// </summary>
     /// <param name="selectDevice">Device to select.</param>
-    protected void SelectDevice(IDevice selectDevice)
+    protected void SelectDevice(ConnectedDeviceDefinition selectDevice)
     {
-      this.SelectedUSBDevice = selectDevice;
+      this.SelectedUSBDevice = DeviceManager.Current.GetDevice(selectDevice);
     }
 
     /// <summary>
@@ -281,9 +292,9 @@ namespace MSF.USBConnector
     /// </summary>
     /// <param name="device">Device to check for.</param>
     /// <returns>True if exists in list.</returns>
-    private bool DoesDeviceListContainDevice(IDevice device)
+    private bool DoesConnectedDeviceListContainDevice(IDevice device)
     {
-      foreach (IDevice checkDevice in this.USBDeviceList)
+      foreach (var checkDevice in this.USBConnectedDeviceList)
       {
         if (checkDevice.DeviceId == device?.DeviceId)
         {
@@ -314,14 +325,16 @@ namespace MSF.USBConnector
       this.EventAggregator.PublishOnUIThreadAsync(new DeviceDisconnectedEvent(sender, e));
     }
 
-    /// <summary>
-    /// Returns if a device is the wrong interface.
-    /// </summary>
-    /// <param name="obj">IDevice to check interface.</param>
-    /// <returns>True if does not contain correct interface.</returns>
-    private bool DoesNotContainCorrectInterface(IDevice obj)
+    private void RemoveIncorrectInterfaces()
     {
-      return !obj.DeviceId.ContainsIgnoreCase(this.UsbInterface);
+      var tempList = new Collection<ConnectedDeviceDefinition>(this.USBConnectedDeviceList.ToArray());
+      foreach (var item in tempList)
+      {
+        if (!item.DeviceId.ContainsIgnoreCase(this.UsbInterface))
+        {
+          this.USBConnectedDeviceList.Remove(item);
+        }
+      }
     }
   }
 }

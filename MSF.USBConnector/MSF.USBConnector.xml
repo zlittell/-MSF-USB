@@ -60,14 +60,17 @@
         <member name="P:MSF.USBConnector.USBDeviceConnector.SelectedUSBDevice">
             <summary>Gets or sets the USB Device that has been selected for use in functions.</summary>
         </member>
-        <member name="P:MSF.USBConnector.USBDeviceConnector.USBDeviceList">
-            <summary>Gets list of connected USB Devices.</summary>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.USBConnectedDeviceList">
+            <summary>Gets list of ConnectedDeviceDefinitions for USB devices.</summary>
         </member>
         <member name="P:MSF.USBConnector.USBDeviceConnector.UsbInterface">
             <summary>Gets or sets interface for filtering devicelist.</summary>
         </member>
         <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceFilters">
             <summary>Gets list of device filters.</summary>
+        </member>
+        <member name="P:MSF.USBConnector.USBDeviceConnector.DeviceFilter">
+            <summary>Gets device filter.</summary>
         </member>
         <member name="P:MSF.USBConnector.USBDeviceConnector.EventAggregator">
             <summary>Gets Caliburn Micro Event Aggregator.</summary>
@@ -161,13 +164,18 @@
             </summary>
             <returns>Task for the continous reading.</returns>
         </member>
-        <member name="M:MSF.USBConnector.USBDeviceConnector.SelectDevice(Device.Net.IDevice)">
+        <member name="M:MSF.USBConnector.USBDeviceConnector.GetDeviceDefinitionFromDeviceID(System.String)">
+            <summary>Search Device Definition List for specific device.</summary>
+            <param name="deviceID">DeviceID to search for.</param>
+            <returns>DeviceDefinition with specific deviceID.</returns>
+        </member>
+        <member name="M:MSF.USBConnector.USBDeviceConnector.SelectDevice(Device.Net.ConnectedDeviceDefinition)">
             <summary>
             Select a device from the IDevice list to use for connections.
             </summary>
             <param name="selectDevice">Device to select.</param>
         </member>
-        <member name="M:MSF.USBConnector.USBDeviceConnector.DoesDeviceListContainDevice(Device.Net.IDevice)">
+        <member name="M:MSF.USBConnector.USBDeviceConnector.DoesConnectedDeviceListContainDevice(Device.Net.IDevice)">
             <summary>
             Checks if the device list contains a device (Compares DeviceIDs).
             </summary>
@@ -187,13 +195,6 @@
             </summary>
             <param name="sender">Event Sender.</param>
             <param name="e">Event Arguments.</param>
-        </member>
-        <member name="M:MSF.USBConnector.USBDeviceConnector.DoesNotContainCorrectInterface(Device.Net.IDevice)">
-            <summary>
-            Returns if a device is the wrong interface.
-            </summary>
-            <param name="obj">IDevice to check interface.</param>
-            <returns>True if does not contain correct interface.</returns>
         </member>
         <member name="T:MSF.USBConnector.Utility.ByteHelper">
             <summary>Helper class related to bytes from microcontrollers.</summary>
