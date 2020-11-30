@@ -284,7 +284,14 @@ namespace MSF.USBConnector
     /// <param name="selectDevice">Device to select.</param>
     protected void SelectDevice(ConnectedDeviceDefinition selectDevice)
     {
-      this.SelectedUSBDevice = DeviceManager.Current.GetDevice(selectDevice);
+      if (selectDevice == null)
+      {
+        this.SelectedUSBDevice = null;
+      }
+      else
+      {
+        this.SelectedUSBDevice = DeviceManager.Current.GetDevice(selectDevice);
+      }
     }
 
     /// <summary>
