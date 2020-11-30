@@ -107,7 +107,6 @@ namespace MSF.USBConnector
     /// </summary>
     protected void RunAfterInitialized()
     {
-      Task.Run(() => this.ContinousRead(), this.ContinousReadCancellationToken);
       this.RefreshFilteredDeviceList();
     }
 
@@ -245,27 +244,24 @@ namespace MSF.USBConnector
     /// <returns>Task for the continous reading.</returns>
     protected async Task ContinousRead()
     {
-      while (true)
+      while (this.SelectedUSBDevice != null)
       {
-        if (this.SelectedUSBDevice != null)
+        try
         {
-          try
-          {
-            await this.ReadUSBDevice().ConfigureAwait(false);
-          }
-          catch (IOException ex) when (ex.InnerException?.Message == "The device is not connected.")
-          {
-            this.SelectDevice(null);
-          }
-          catch (Exception ex) when (ex.Message == "The device has not been initialized.")
-          {
-            // debug write this? seems not useful
-          }
-          catch (Exception ex)
-          {
-            Debug.WriteLine(ex.Message.ToString());
-            throw new IOException("Problem in continous read thread.", ex);
-          }
+          await this.ReadUSBDevice().ConfigureAwait(false);
+        }
+        catch (IOException ex) when (ex.InnerException?.Message == "The device is not connected.")
+        {
+          this.SelectDevice(null);
+        }
+        catch (Exception ex) when (ex.Message == "The device has not been initialized.")
+        {
+          // debug write this? seems not useful
+        }
+        catch (Exception ex)
+        {
+          Debug.WriteLine(ex.Message.ToString());
+          throw new IOException("Problem in continous read thread.", ex);
         }
       }
     }
@@ -291,6 +287,7 @@ namespace MSF.USBConnector
       else
       {
         this.SelectedUSBDevice = DeviceManager.Current.GetDevice(selectDevice);
+        Task.Run(() => this.ContinousRead(), this.ContinousReadCancellationToken);
       }
     }
 
