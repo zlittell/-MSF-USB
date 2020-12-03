@@ -16,7 +16,7 @@ namespace MSF.USBMessages
         /// </summary>
         /// <param name="payload">Payload used to create the sendable USB datagram.</param>
         /// <exception cref="ArgumentNullException">Payload is null.</exception>
-        public SendableSimpleUSBMessage(byte[] payload)
+        protected SendableSimpleUSBMessage(byte[] payload)
         {
             if (payload == null)
             {
