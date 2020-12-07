@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Caliburn.Micro.Core" Version="4.0.136-rc" />
     <PackageReference Include="Hid.Net" Version="3.1.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.1">
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
